@@ -1,0 +1,155 @@
+# AI Portal Configuration File
+# Memory-Enhanced Learning Machine v26.2.0
+
+# Database Configuration
+database:
+  pool_size: 10
+  max_overflow: 20
+  pool_recycle: 3600
+  echo: false  # Set to true for SQL debugging
+
+# Model Tiers and Routing
+model_tiers:
+  economy:
+    - "gpt-3.5-turbo"
+    - "anthropic/claude-3-haiku"
+    - "google/gemini-pro"
+  
+  standard:
+    - "anthropic/claude-3-sonnet"
+    - "openai/gpt-4"
+    - "google/gemini-pro-vision"
+  
+  premium:
+    - "anthropic/claude-3-opus"
+    - "openai/gpt-4-turbo"
+    - "openai/gpt-4o"
+
+# Task to Model Tier Mapping
+task_tier_map:
+  simple_qa: "economy"
+  code_generation: "standard"
+  image_generation: "standard"
+  function_routing: "economy"
+  complex_reasoning: "premium"
+
+# Task to Service Mapping
+task_service_map:
+  simple_qa: "openrouter"
+  code_generation: "openrouter"
+  image_generation: "openrouter"
+  function_routing: "openrouter"
+  complex_reasoning: "openrouter"
+
+# Service to Model Mapping
+service_model_map:
+  openrouter:
+    - "gpt-3.5-turbo"
+    - "anthropic/claude-3-haiku"
+    - "anthropic/claude-3-sonnet"
+    - "anthropic/claude-3-opus"
+    - "openai/gpt-4"
+    - "openai/gpt-4-turbo"
+    - "openai/gpt-4o"
+    - "stable-diffusion-xl"
+    - "dall-e-3"
+  
+  google:
+    - "gemini-pro"
+    - "gemini-pro-vision"
+
+# Available Tools Configuration
+available_tools:
+  - name: "web_search"
+    description: "Search the web for current information using Google"
+    parameters:
+      query:
+        type: "string"
+        description: "The search query"
+        required: true
+  
+  - name: "browse_website"
+    description: "Visit and extract content from a website"
+    parameters:
+      url:
+        type: "string"
+        description: "The URL to visit"
+        required: true
+  
+  - name: "save_to_file"
+    description: "Save content to a file in the workspace"
+    parameters:
+      filename:
+        type: "string"
+        description: "The name of the file to save"
+        required: true
+      content:
+        type: "string"
+        description: "The content to save"
+        required: true
+  
+  - name: "generateAdCopy"
+    description: "Generate advertising copy for products"
+    parameters:
+      productName:
+        type: "string"
+        description: "The name of the product"
+        required: true
+      audience:
+        type: "string"
+        description: "The target audience"
+        required: true
+      niche:
+        type: "string"
+        description: "The product niche (optional)"
+        required: false
+
+# Memory Learning System Configuration
+memory_dir: "./agent_memory"
+embedding_model: "all-MiniLM-L6-v2"
+similarity_threshold: 0.7
+max_memory_results: 10
+
+# Google AI Configuration
+google_ai_scopes:
+  - "https://www.googleapis.com/auth/cloud-platform"
+  - "https://www.googleapis.com/auth/generative-language"
+
+# Tool Security Configuration
+max_file_size: 10485760  # 10MB in bytes
+max_content_length: 1000000  # 1MB
+allowed_file_extensions:
+  - ".txt"
+  - ".md"
+  - ".json"
+  - ".yaml"
+  - ".yml"
+  - ".py"
+  - ".js"
+  - ".html"
+  - ".css"
+  - ".xml"
+  - ".csv"
+  - ".log"
+  - ".sql"
+
+# External Service Configuration
+copyshark_service:
+  base_url: "https://your-copyshark-api.com"
+
+# Application Settings
+app:
+  title: "AI Portal - Learning Machine"
+  version: "26.2.0"
+  description: "Advanced AI orchestration system with persistent learning capabilities"
+  host: "0.0.0.0"
+  port: 8000
+  reload: false  # Set to true for development
+  log_level: "info"
+
+# CORS Configuration
+cors:
+  allow_origins: ["*"]  # Configure appropriately for production
+  allow_credentials: true
+  allow_methods: ["*"]
+  allow_headers: ["*"]
