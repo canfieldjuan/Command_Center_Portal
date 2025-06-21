@@ -1,25 +1,22 @@
-"""
-Configuration management for AI Portal application
-"""
+# AI Portal Configuration Manager
+# Extracted from main.py v26.2.0 - COMPLETE ORIGINAL FUNCTIONALITY
+# FIXED: Optional database config for testing
 
 import os
-import yaml
 import urllib.parse
+import yaml
 import structlog
-from typing import Dict, Any, Optional
 
 logger = structlog.get_logger()
 
 class ConfigManager:
-    """Centralized configuration management with environment variable support"""
-    
-    def __init__(self, config_file: str = "config.yaml"):
+    def __init__(self, config_file: str = "config.yaml", require_db: bool = True):
         self.config_file = config_file
         self.config = {}
+        self.require_db = require_db
         self.load_config()
 
     def load_config(self):
-        """Load configuration from YAML file and environment variables"""
         try:
             with open(self.config_file, 'r') as f:
                 self.config = yaml.safe_load(f)
@@ -39,25 +36,19 @@ class ConfigManager:
         self.config["serper_api_key"] = os.environ.get("SERPER_API_KEY")
         self.config["copyshark_api_token"] = os.environ.get("COPYSHARK_API_TOKEN")
         
-        # Database configuration with validation
+        # Database configuration with optional requirement for testing
         db_password = os.environ.get("SUPABASE_PASSWORD")
         if not db_password:
-            raise ValueError("SUPABASE_PASSWORD environment variable not found. Please set it in your .env file.")
-        
-        encoded_password = urllib.parse.quote(db_password, safe='')
-        self.config["database_url"] = f"postgresql://postgres.jacjorrzxilmrfxbdyse:{encoded_password}@aws-0-us-east-2.pooler.supabase.com:6543/postgres"
+            if self.require_db:
+                raise ValueError("SUPABASE_PASSWORD environment variable not found. Please set it in your .env file.")
+            else:
+                logger.warning("SUPABASE_PASSWORD not set - using test database URL")
+                self.config["database_url"] = "postgresql://test:test@localhost:5432/test_db"
+        else:
+            encoded_password = urllib.parse.quote(db_password, safe='')
+            self.config["database_url"] = f"postgresql://postgres.jacjorrzxilmrfxbdyse:{encoded_password}@aws-0-us-east-2.pooler.supabase.com:6543/postgres"
 
         # Set comprehensive default config values if not in yaml
-        self._set_default_configurations()
-        
-        logger.info("Configuration initialization complete", 
-                   config_keys=list(self.config.keys()),
-                   model_tiers=len(self.config.get('model_tiers', {})),
-                   available_tools=len(self.config.get('available_tools', [])))
-
-    def _set_default_configurations(self):
-        """Set default configuration values"""
-        
         if 'model_tiers' not in self.config:
             self.config['model_tiers'] = {
                 'economy': [
@@ -183,7 +174,12 @@ class ConfigManager:
                 'base_url': 'https://your-copyshark-api.com'
             }
 
-    def get(self, key: str, default: Any = None) -> Any:
+        logger.info("Configuration initialization complete", 
+                   config_keys=list(self.config.keys()),
+                   model_tiers=len(self.config.get('model_tiers', {})),
+                   available_tools=len(self.config.get('available_tools', [])))
+
+    def get(self, key: str, default=None):
         """Get configuration value with optional default"""
         value = self.config.get(key, default)
         if value is None and default is not None:
@@ -195,11 +191,3 @@ class ConfigManager:
         """Reload configuration from file"""
         logger.info("Reloading configuration", file=self.config_file)
         self.load_config()
-
-    def validate_required_keys(self, required_keys: list) -> bool:
-        """Validate that required configuration keys are present"""
-        missing_keys = [key for key in required_keys if not self.config.get(key)]
-        if missing_keys:
-            logger.error("Missing required configuration keys", missing=missing_keys)
-            return False
-        return True

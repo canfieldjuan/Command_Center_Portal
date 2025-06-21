@@ -1,21 +1,6 @@
-"""
-Database models package for AI Portal - COMPLETE VERSION
-"""
+# AI Portal Models Module
+# SQLAlchemy database models
 
-from .base import Base, engine, SessionLocal, create_tables, get_db_session
-from .project import Project
-from .persona import Persona
-from .chat_history import ChatHistory
-from .project_settings import ProjectSettings
+from .models import Base, Project, Persona, ChatHistory, ProjectSettings
 
-__all__ = [
-    "Base",
-    "engine", 
-    "SessionLocal",
-    "create_tables",
-    "get_db_session",
-    "Project",
-    "Persona",
-    "ChatHistory", 
-    "ProjectSettings"
-]
+__all__ = ["Base", "Project", "Persona", "ChatHistory", "ProjectSettings"]

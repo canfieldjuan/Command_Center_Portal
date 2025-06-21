@@ -1,16 +1,7 @@
-"""
-AI services package for external integrations - COMPLETE VERSION
-ALL original service integrations preserved
-"""
+# AI Portal Services Module
+# Business logic services and integrations
 
-from .openrouter import OpenSourceAIService
-from .google_ai import GoogleAIService
 from .tools import ToolService
-from .memory import MemoryService
+from .router import SimpleIntelligentRouter
 
-__all__ = [
-    "OpenSourceAIService",
-    "GoogleAIService", 
-    "ToolService",
-    "MemoryService"
-]
+__all__ = ["ToolService", "SimpleIntelligentRouter"]

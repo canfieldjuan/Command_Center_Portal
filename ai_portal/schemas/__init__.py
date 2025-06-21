@@ -1,19 +1,16 @@
-"""
-Pydantic schemas package for AI Portal API
-"""
+# AI Portal Schemas Module
+# Pydantic models for request/response validation
 
-from .project import ProjectRequest, ProjectResponse
-from .persona import PersonaRequest, PersonaResponse
-from .chat import ChatRequest, ChatResponse, ChatCompletionResponse
-from .objective import ObjectiveRequest
+from .schemas import (
+    ProjectRequest, ProjectResponse,
+    PersonaRequest, PersonaResponse,
+    ChatRequest, ChatCompletionResponse, ChatResponse,
+    ObjectiveRequest
+)
 
 __all__ = [
-    "ProjectRequest",
-    "ProjectResponse", 
-    "PersonaRequest",
-    "PersonaResponse",
-    "ChatRequest",
-    "ChatResponse",
-    "ChatCompletionResponse",
+    "ProjectRequest", "ProjectResponse", 
+    "PersonaRequest", "PersonaResponse",
+    "ChatRequest", "ChatCompletionResponse", "ChatResponse",
     "ObjectiveRequest"
 ]

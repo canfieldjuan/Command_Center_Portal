@@ -1,5 +1,6 @@
 """
 Chat history database model for conversation tracking - COMPLETE VERSION
+Extracted from main.py - ALL original tracking and metrics functionality preserved
 """
 
 import uuid
@@ -13,7 +14,7 @@ from .base import Base
 class ChatHistory(Base):
     """
     Chat history model for storing conversation data and analytics
-    COMPLETE with all original tracking and metrics functionality
+    COMPLETE with all original tracking and metrics functionality from main.py
     """
     __tablename__ = 'chat_history'
     

@@ -1,0 +1,108 @@
+Folder PATH listing
+Volume serial number is 880E-990F
+C:.
+³   .env.example
+³   .gitignore
+³   app.py
+³   cd
+³   config.yaml
+³   create_core_services.py
+³   create_foundation_bundle_fixed.py
+³   main.py
+³   main_backup_20250621_161622.py
+³   python
+³   README.md
+³   requirements.txt
+³   run.py
+³   tree.txt
+³   __init__.py
+³   
+ÃÄÄÄagent_memory
+³       .gitkeep
+³       
+ÃÄÄÄapi
+³       chat.py
+³       memory.py
+³       objectives.py
+³       personas.py
+³       projects.py
+³       system.py
+³       __init__.py
+³       
+ÃÄÄÄcore
+³   ³   config.py
+³   ³   database.py
+³   ³   database_manager.py
+³   ³   decorators.py
+³   ³   logger.py
+³   ³   router.py
+³   ³   __init__.py
+³   ³   
+³   ÀÄÄÄ__pycache__
+³           config.cpython-310.pyc
+³           __init__.cpython-310.pyc
+³           
+ÃÄÄÄdecorators
+³   ³   decorators.py
+³   ³   __init__.py
+³   ³   
+³   ÀÄÄÄ__pycache__
+³           decorators.cpython-310.pyc
+³           __init__.cpython-310.pyc
+³           
+ÃÄÄÄlogs
+³       .gitkeep
+³       
+ÃÄÄÄmodels
+³   ³   base.py
+³   ³   chat_history.py
+³   ³   models.py
+³   ³   persona.py
+³   ³   project.py
+³   ³   project_settings.py
+³   ³   __init__.py
+³   ³   
+³   ÀÄÄÄ__pycache__
+³           models.cpython-310.pyc
+³           __init__.cpython-310.pyc
+³           
+ÃÄÄÄorchestration
+³       critic_agent.py
+³       master_planner.py
+³       orchestration_engine.py
+³       persona_dispatcher.py
+³       __init__.py
+³       
+ÃÄÄÄschemas
+³   ³   chat.py
+³   ³   objective.py
+³   ³   persona.py
+³   ³   project.py
+³   ³   schemas.py
+³   ³   __init__.py
+³   ³   
+³   ÀÄÄÄ__pycache__
+³           schemas.cpython-310.pyc
+³           __init__.cpython-310.pyc
+³           
+ÃÄÄÄservices
+³   ³   api_client_manager.py
+³   ³   google_ai.py
+³   ³   memory.py
+³   ³   openrouter.py
+³   ³   router.py
+³   ³   service_registry.py
+³   ³   tools.py
+³   ³   validators.py
+³   ³   __init__.py
+³   ³   
+³   ÀÄÄÄ__pycache__
+³           __init__.cpython-310.pyc
+³           
+ÃÄÄÄutils
+³       logging.py
+³       __init__.py
+³       
+ÀÄÄÄworkspace
+        .gitkeep
+        

@@ -1,5 +1,6 @@
 """
 Project settings database model for configuration management - COMPLETE VERSION
+Extracted from main.py - ALL original configuration functionality preserved
 """
 
 from sqlalchemy import Column, Integer, ForeignKey, JSON
@@ -10,7 +11,7 @@ from .base import Base
 class ProjectSettings(Base):
     """
     Project settings model for storing project-specific configurations
-    COMPLETE with all original configuration functionality
+    COMPLETE with all original configuration functionality from main.py
     """
     __tablename__ = 'project_settings'
     

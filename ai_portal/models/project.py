@@ -1,5 +1,6 @@
 """
 Project database model - COMPLETE VERSION
+Extracted from main.py - ALL original functionality preserved
 """
 
 import uuid
@@ -14,7 +15,7 @@ from .base import Base
 class Project(Base):
     """
     Project model for organizing user work and chat sessions
-    COMPLETE with all original functionality
+    COMPLETE with all original functionality from main.py
     """
     __tablename__ = 'projects'
     

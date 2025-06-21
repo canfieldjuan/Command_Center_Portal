@@ -1,5 +1,6 @@
 """
 SQLAlchemy base setup and database configuration - COMPLETE VERSION
+Extracted from main.py - ALL original functionality preserved
 """
 
 import os

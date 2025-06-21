@@ -1,5 +1,6 @@
 """
 Persona database model for AI personality management - COMPLETE VERSION
+Extracted from main.py - ALL original functionality preserved
 """
 
 import uuid
@@ -12,7 +13,7 @@ from .base import Base
 class Persona(Base):
     """
     Persona model for AI personality and behavior customization
-    COMPLETE with all original validation and functionality
+    COMPLETE with all original validation and functionality from main.py
     """
     __tablename__ = 'personas'
     

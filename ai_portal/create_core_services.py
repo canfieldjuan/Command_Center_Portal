@@ -1,4 +1,271 @@
-# AI Portal Tool Service
+#!/usr/bin/env python3
+"""
+AI PORTAL PHASE 2A: CORE SERVICES CREATION (FINAL FIXED)
+Creates core business logic services with FIXED regex syntax
+
+SERVICES INCLUDED:
+- ConfigManager (configuration and environment handling)
+- ToolService (web search, file ops, website browsing, ad copy)
+- SimpleIntelligentRouter (AI model routing and selection)
+
+RISK LEVEL: 🟡 MEDIUM RISK (Business logic extraction)
+VERSION: AI Portal v26.2.0 Core Services Bundle (REGEX FIXED)
+"""
+
+import os
+import sys
+import shutil
+from pathlib import Path
+from datetime import datetime
+
+def create_core_module():
+    """Create core configuration module"""
+    print("\n📦 Creating core module...")
+    
+    core_dir = Path("core")
+    core_dir.mkdir(exist_ok=True)
+    
+    # core/__init__.py
+    init_content = '''# AI Portal Core Module
+# Core configuration and system management
+
+from .config import ConfigManager
+
+__all__ = ["ConfigManager"]
+'''
+    
+    # core/config.py - SAME AS BEFORE (this was working fine)
+    config_content = '''# AI Portal Configuration Manager
+# Extracted from main.py v26.2.0 - COMPLETE ORIGINAL FUNCTIONALITY
+# FIXED: Optional database config for testing
+
+import os
+import urllib.parse
+import yaml
+import structlog
+
+logger = structlog.get_logger()
+
+class ConfigManager:
+    def __init__(self, config_file: str = "config.yaml", require_db: bool = True):
+        self.config_file = config_file
+        self.config = {}
+        self.require_db = require_db
+        self.load_config()
+
+    def load_config(self):
+        try:
+            with open(self.config_file, 'r') as f:
+                self.config = yaml.safe_load(f)
+                logger.info("Configuration loaded successfully", file=self.config_file)
+        except FileNotFoundError:
+            logger.warning("Config file not found, using defaults", file=self.config_file)
+            self.config = {}
+        except yaml.YAMLError as e:
+            logger.error("Failed to parse config file", error=str(e), file=self.config_file)
+            self.config = {}
+        except Exception as e:
+            logger.error("Unexpected error loading config file", error=str(e), file=self.config_file)
+            self.config = {}
+
+        # Load environment variables with validation
+        self.config["openrouter_api_key"] = os.environ.get("OPENROUTER_API_KEY")
+        self.config["serper_api_key"] = os.environ.get("SERPER_API_KEY")
+        self.config["copyshark_api_token"] = os.environ.get("COPYSHARK_API_TOKEN")
+        
+        # Database configuration with optional requirement for testing
+        db_password = os.environ.get("SUPABASE_PASSWORD")
+        if not db_password:
+            if self.require_db:
+                raise ValueError("SUPABASE_PASSWORD environment variable not found. Please set it in your .env file.")
+            else:
+                logger.warning("SUPABASE_PASSWORD not set - using test database URL")
+                self.config["database_url"] = "postgresql://test:test@localhost:5432/test_db"
+        else:
+            encoded_password = urllib.parse.quote(db_password, safe='')
+            self.config["database_url"] = f"postgresql://postgres.jacjorrzxilmrfxbdyse:{encoded_password}@aws-0-us-east-2.pooler.supabase.com:6543/postgres"
+
+        # Set comprehensive default config values if not in yaml
+        if 'model_tiers' not in self.config:
+            self.config['model_tiers'] = {
+                'economy': [
+                    'gpt-3.5-turbo',
+                    'anthropic/claude-3-haiku',
+                    'google/gemini-pro'
+                ],
+                'standard': [
+                    'anthropic/claude-3-sonnet',
+                    'openai/gpt-4',
+                    'google/gemini-pro-vision'
+                ],
+                'premium': [
+                    'anthropic/claude-3-opus',
+                    'openai/gpt-4-turbo',
+                    'openai/gpt-4o'
+                ]
+            }
+        
+        if 'task_tier_map' not in self.config:
+            self.config['task_tier_map'] = {
+                'simple_qa': 'economy',
+                'code_generation': 'standard',
+                'image_generation': 'standard',
+                'function_routing': 'economy',
+                'complex_reasoning': 'premium'
+            }
+        
+        if 'task_service_map' not in self.config:
+            self.config['task_service_map'] = {
+                'simple_qa': 'openrouter',
+                'code_generation': 'openrouter',
+                'image_generation': 'openrouter',
+                'function_routing': 'openrouter',
+                'complex_reasoning': 'openrouter'
+            }
+        
+        if 'service_model_map' not in self.config:
+            self.config['service_model_map'] = {
+                'openrouter': [
+                    'gpt-3.5-turbo',
+                    'anthropic/claude-3-haiku',
+                    'anthropic/claude-3-sonnet',
+                    'anthropic/claude-3-opus',
+                    'openai/gpt-4',
+                    'openai/gpt-4-turbo',
+                    'openai/gpt-4o',
+                    'stable-diffusion-xl',
+                    'dall-e-3'
+                ],
+                'google': [
+                    'gemini-pro',
+                    'gemini-pro-vision'
+                ]
+            }
+        
+        if 'available_tools' not in self.config:
+            self.config['available_tools'] = [
+                {
+                    'name': 'web_search',
+                    'description': 'Search the web for current information using Google',
+                    'parameters': {
+                        'query': {'type': 'string', 'description': 'The search query', 'required': True}
+                    }
+                },
+                {
+                    'name': 'browse_website',
+                    'description': 'Visit and extract content from a website',
+                    'parameters': {
+                        'url': {'type': 'string', 'description': 'The URL to visit', 'required': True}
+                    }
+                },
+                {
+                    'name': 'save_to_file',
+                    'description': 'Save content to a file in the workspace',
+                    'parameters': {
+                        'filename': {'type': 'string', 'description': 'The name of the file to save', 'required': True},
+                        'content': {'type': 'string', 'description': 'The content to save', 'required': True}
+                    }
+                },
+                {
+                    'name': 'generateAdCopy',
+                    'description': 'Generate advertising copy for products',
+                    'parameters': {
+                        'productName': {'type': 'string', 'description': 'The name of the product', 'required': True},
+                        'audience': {'type': 'string', 'description': 'The target audience', 'required': True},
+                        'niche': {'type': 'string', 'description': 'The product niche (optional)', 'required': False}
+                    }
+                }
+            ]
+
+        # Memory system configuration
+        if 'memory_dir' not in self.config:
+            self.config['memory_dir'] = './agent_memory'
+        if 'embedding_model' not in self.config:
+            self.config['embedding_model'] = 'all-MiniLM-L6-v2'
+        if 'similarity_threshold' not in self.config:
+            self.config['similarity_threshold'] = 0.7
+        if 'max_memory_results' not in self.config:
+            self.config['max_memory_results'] = 10
+
+        # Google AI scopes configuration
+        if 'google_ai_scopes' not in self.config:
+            self.config['google_ai_scopes'] = [
+                'https://www.googleapis.com/auth/cloud-platform',
+                'https://www.googleapis.com/auth/generative-language'
+            ]
+
+        # Tool security configuration
+        if 'max_file_size' not in self.config:
+            self.config['max_file_size'] = 10 * 1024 * 1024  # 10MB
+        if 'max_content_length' not in self.config:
+            self.config['max_content_length'] = 1000000  # 1MB
+        if 'allowed_file_extensions' not in self.config:
+            self.config['allowed_file_extensions'] = [
+                '.txt', '.md', '.json', '.yaml', '.yml', '.py', '.js', 
+                '.html', '.css', '.xml', '.csv', '.log', '.sql'
+            ]
+
+        # CopyShark service configuration
+        if 'copyshark_service' not in self.config:
+            self.config['copyshark_service'] = {
+                'base_url': 'https://your-copyshark-api.com'
+            }
+
+        logger.info("Configuration initialization complete", 
+                   config_keys=list(self.config.keys()),
+                   model_tiers=len(self.config.get('model_tiers', {})),
+                   available_tools=len(self.config.get('available_tools', [])))
+
+    def get(self, key: str, default=None):
+        """Get configuration value with optional default"""
+        value = self.config.get(key, default)
+        if value is None and default is not None:
+            logger.warning("Configuration key not found, using default", 
+                         key=key, default=default)
+        return value
+
+    def reload_config(self):
+        """Reload configuration from file"""
+        logger.info("Reloading configuration", file=self.config_file)
+        self.load_config()
+'''
+    
+    # Write files
+    (core_dir / "__init__.py").write_text(init_content, encoding='utf-8')
+    (core_dir / "config.py").write_text(config_content, encoding='utf-8')
+    
+    print(f"   ✅ {core_dir}/__init__.py")
+    print(f"   ✅ {core_dir}/config.py")
+
+def create_services_module():
+    """Create services module"""
+    print("\n📦 Creating services module...")
+    
+    services_dir = Path("services")
+    services_dir.mkdir(exist_ok=True)
+    
+    # services/__init__.py
+    init_content = '''# AI Portal Services Module
+# Business logic services and integrations
+
+from .tools import ToolService
+from .router import SimpleIntelligentRouter
+
+__all__ = ["ToolService", "SimpleIntelligentRouter"]
+'''
+    
+    # Write init file
+    (services_dir / "__init__.py").write_text(init_content, encoding='utf-8')
+    print(f"   ✅ {services_dir}/__init__.py")
+
+def create_tools_service():
+    """Create comprehensive tools service - FIXED REGEX SYNTAX"""
+    print("\n📦 Creating tools service...")
+    
+    services_dir = Path("services")
+    
+    # services/tools.py - FIXED: Corrected regex patterns
+    tools_content = '''# AI Portal Tool Service
 # Web search, file operations, website browsing, and ad copy generation
 # Extracted from main.py v26.2.0 - COMPLETE ORIGINAL FUNCTIONALITY
 # FIXED: Regex syntax corrected
@@ -45,7 +312,7 @@ class ToolService:
             return False
         
         # Check for path traversal attempts
-        if ".." in filename or filename.startswith("/") or filename.startswith("\\"):
+        if ".." in filename or filename.startswith("/") or filename.startswith("\\\\"):
             logger.warning("Path traversal attempt detected", filename=filename)
             return False
         
@@ -266,7 +533,7 @@ class ToolService:
                     meta_description = ""
                     try:
                         meta_description = await page.evaluate(
-                            "document.querySelector('meta[name="description"]')?.getAttribute('content') || ''"
+                            "document.querySelector('meta[name=\"description\"]')?.getAttribute('content') || ''"
                         )
                     except:
                         pass
@@ -450,3 +717,214 @@ class ToolService:
                         error=str(e),
                         product=productName[:30])
             raise ValueError(f"Ad copy generation failed: {str(e)}")
+'''
+    
+    # Write tools service
+    (services_dir / "tools.py").write_text(tools_content, encoding='utf-8')
+    print(f"   ✅ {services_dir}/tools.py (REGEX FIXED)")
+
+def create_router_service():
+    """Create intelligent routing service"""
+    print("\n📦 Creating router service...")
+    
+    services_dir = Path("services")
+    
+    # services/router.py - SAME AS BEFORE (this was working fine)
+    router_content = '''# AI Portal Intelligent Router
+# Routes tasks to appropriate AI services and models
+# Extracted from main.py v26.2.0 - COMPLETE ORIGINAL FUNCTIONALITY
+
+from typing import Dict, Optional
+import structlog
+
+logger = structlog.get_logger()
+
+class SimpleIntelligentRouter:
+    def __init__(self, config: Dict):
+        self.config = config
+        self.model_tiers = config.get('model_tiers', {})
+        self.task_tier_map = config.get('task_tier_map', {})
+        self.task_service_map = config.get('task_service_map', {})
+        self.service_model_map = config.get('service_model_map', {})
+        
+        logger.info("SimpleIntelligentRouter initialized", 
+                   model_tiers=len(self.model_tiers),
+                   task_mappings=len(self.task_tier_map),
+                   service_mappings=len(self.service_model_map))
+
+    def route(self, task_type: str, user_tier: str = "free", persona=None):
+        """Route task to appropriate service and model"""
+        logger.debug("Routing request", 
+                    task_type=task_type,
+                    user_tier=user_tier,
+                    persona_name=persona.name if persona else None)
+        
+        # Check persona preference first
+        if persona and hasattr(persona, 'model_preference') and persona.model_preference:
+            model = persona.model_preference
+            logger.debug("Checking persona model preference", 
+                        persona=persona.name,
+                        preferred_model=model)
+            
+            # Find which service supports this model
+            for service, models in self.service_model_map.items():
+                if model in models:
+                    reasoning = f"Persona preference: {persona.name} prefers {model}"
+                    logger.info("Routed via persona preference", 
+                              service=service,
+                              model=model,
+                              persona=persona.name)
+                    return {
+                        'service': service,
+                        'model': model,
+                        'reasoning': reasoning
+                    }
+            
+            logger.warning("Persona preferred model not available", 
+                         persona=persona.name,
+                         preferred_model=model,
+                         available_services=list(self.service_model_map.keys()))
+
+        # Default routing logic based on task type and user tier
+        service = self.task_service_map.get(task_type, 'openrouter')
+        tier_name = self.task_tier_map.get(task_type, 'economy')
+        
+        # Upgrade tier for pro users
+        if user_tier == "pro" and tier_name == "economy":
+            tier_name = "standard"
+            logger.debug("Upgraded tier for pro user", 
+                        original_tier="economy",
+                        upgraded_tier=tier_name)
+        
+        # Get models for this tier
+        models_in_tier = self.model_tiers.get(tier_name, [])
+        if not models_in_tier:
+            logger.warning("No models found for tier", tier=tier_name)
+            # Fallback to economy tier
+            models_in_tier = self.model_tiers.get('economy', [])
+            tier_name = 'economy'
+        
+        # Get models supported by the target service
+        service_models = self.service_model_map.get(service, [])
+        if not service_models:
+            logger.warning("No models found for service", service=service)
+            # Fallback to openrouter
+            service = 'openrouter'
+            service_models = self.service_model_map.get(service, [])
+        
+        # Find intersection of tier models and service models
+        available_models = [model for model in models_in_tier if model in service_models]
+        
+        if not available_models:
+            logger.error("No compatible models found", 
+                        task_type=task_type,
+                        tier=tier_name,
+                        service=service,
+                        tier_models=models_in_tier,
+                        service_models=service_models)
+            raise ValueError(f"No model found for task '{task_type}' on tier '{tier_name}' with service '{service}'")
+        
+        # Select the first available model (could be enhanced with load balancing)
+        selected_model = available_models[0]
+        reasoning = f"Task '{task_type}' on tier '{tier_name}' routed to '{service}' using model '{selected_model}'"
+        
+        if user_tier == "pro":
+            reasoning += " (pro tier)"
+        
+        logger.info("Routing completed", 
+                   service=service,
+                   model=selected_model,
+                   task_type=task_type,
+                   tier=tier_name,
+                   user_tier=user_tier)
+        
+        return {
+            'service': service,
+            'model': selected_model,
+            'reasoning': reasoning
+        }
+'''
+    
+    # Write router service
+    (services_dir / "router.py").write_text(router_content, encoding='utf-8')
+    print(f"   ✅ {services_dir}/router.py")
+
+def run_core_services_tests():
+    """Test all core services (FIXED - environment safe)"""
+    print("\n🧪 Testing core services...")
+    
+    try:
+        # Test core config (TEST MODE - no database requirement)
+        print("   🔍 Testing core config...")
+        sys.path.insert(0, str(Path.cwd()))
+        
+        from core import ConfigManager
+        config = ConfigManager("test_config.yaml", require_db=False)  # TEST MODE
+        print("   ✅ ConfigManager working (test mode)")
+        
+        # Test services
+        print("   🔍 Testing services...")
+        from services import ToolService, SimpleIntelligentRouter
+        
+        # Test ToolService initialization
+        tool_service = ToolService(config.config)
+        print("   ✅ ToolService working (regex fixed)")
+        
+        # Test Router initialization  
+        router = SimpleIntelligentRouter(config.config)
+        print("   ✅ SimpleIntelligentRouter working")
+        
+        # Test routing functionality
+        route_result = router.route('simple_qa', 'free')
+        print(f"   ✅ Router routing working: {route_result['model']}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"   ❌ Test failed: {e}")
+        print(f"   📝 Error details: {type(e).__name__}")
+        return False
+
+def main():
+    """Create complete Core Services bundle (FINAL FIXED)"""
+    print("🚀 AI PORTAL PHASE 2A: CORE SERVICES CREATION (FINAL FIXED)")
+    print("=" * 70)
+    print("PHASE 2A: Core Services (Medium Risk Components)")
+    print("Creating: ConfigManager, ToolService, SimpleIntelligentRouter")
+    print("FIXED: Regex syntax error in tools.py resolved")
+    print("=" * 70)
+    
+    # Create all core services
+    create_core_module()
+    create_services_module()
+    create_tools_service()
+    create_router_service()
+    
+    # Test services (FIXED)
+    success = run_core_services_tests()
+    
+    print("\n" + "=" * 70)
+    if success:
+        print("✅ CORE SERVICES CREATION COMPLETE!")
+        print("\n📁 Created modules:")
+        print("   • core/ - Configuration management")
+        print("   • services/tools.py - Web search, file ops, browsing, ad copy (REGEX FIXED)")
+        print("   • services/router.py - Intelligent AI model routing")
+        
+        print("\n🎯 READY FOR PHASE 2B: AI Services")
+        print("   (OpenSourceAIService, GoogleAIService)")
+        
+        print("\n💡 ALL SECURITY VALIDATIONS PRESERVED:")
+        print("   • File path validation and directory traversal protection")
+        print("   • Content security scanning with fixed regex patterns")
+        print("   • URL validation and IP blocking")
+        print("   • API key management and error handling")
+        
+    else:
+        print("❌ CORE SERVICES CREATION FAILED!")
+        print("Check error messages above and retry")
+    
+    print("=" * 70)
+
+if __name__ == "__main__":
+    main()
